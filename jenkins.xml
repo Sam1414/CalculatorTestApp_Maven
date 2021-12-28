@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jenkins-jobs>
+	<jenkins-job>
+		<template>BASIC-JAVA-PIPELINE</template>
+			<build>
+				<property>
+					<name>command</name>
+					<value>install</value>
+				</property>
+				<property>
+					<name>labelExpr</name>
+					<value>master</value>
+					<!--<value>jenkins_linux_slave</value> -->
+				</property>
+				<property>
+					<name>buildType</name>
+					<value>pipeline</value>  
+				</property>
+			</build>
+			
+		<!-- Performance Run Stage -->
+		<!-- <performance-run>
+			<property>
+				<name>p-pom</name>
+				<value>DemoSampleApp_Jmeter</value>
+			</property>
+			<property>
+				<name>p-port</name>
+				<value>8090</value>
+			</property>
+			<property>
+				<name>p-context</name>
+				<value>devopssampleapplication</value>
+			</property>
+		</performance-run> -->
+
+		<!-- Selenium Stage -->
+		<!-- <selenium-run>
+			<property>
+				<name>s-pom</name>
+				<value>DemoSampleApp_selenium</value>
+			</property>
+			<property>
+				<name>s-port</name>
+				<value>8091</value>
+			</property>
+			<property>
+				<name>s-context</name>
+				<value>devopssampleapplication</value>
+			</property>
+		</selenium-run> -->
+		
+		
+		<!-- Docker Plugin-->
+		<docker-run>
+			<property>
+				<name>image</name>
+				<value>tomcat:alpine</value>
+			</property>
+			<property>
+				<name>volumesString</name>
+				<value> devopssampleapplication.war </value>
+				<!-- for local setup and changes acc. to the code -->
+				<!-- <value>actuator-service-0.0.1-SNAPSHOT.jar</value>  -->
+			</property>
+			<property>
+				<name>bindPorts</name>
+				<value>8090:8090</value>
+			</property>
+		</docker-run>
+				<!--Added Docker complaince plugin -->
+		<docker-compliance>
+			<property>
+				<name>dockercomplianceimages</name>
+				<value>devopssampleapplication:latest</value>
+			</property>
+		</docker-compliance>
+		
+		<!--Added Docker push plugin -->
+		<dockerPush>
+			<property>
+				<name>dockerimage</name>
+				<value>devopssampleapplication:latest</value>
+			</property>
+		</dockerPush>
+		
+		<!--Added Setup Monitoring -->
+		<setup-monitoring>
+			<property>
+				<name>prometheusport</name>
+				<value>9090:9090</value>
+			</property>
+			<property>
+				<name>grafanaport</name>
+				<value>3000:3000</value>
+			</property>
+			<property>
+				<name>nodeexporterport</name>
+				<value>9100:9100</value>
+			</property>
+			<property>
+				<name>pushgatewayport</name>
+				<value>9091:9091</value>
+			</property>
+			<property>
+				<name>cadvisorport</name>
+				<value>8085:8085</value>
+			</property>
+		</setup-monitoring>
+		
+        </jenkins-job>
+</jenkins-jobs>

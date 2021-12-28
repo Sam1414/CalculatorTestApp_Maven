@@ -1,0 +1,43 @@
+---
+
+- name: AWS docker setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Install docker via amazon-linux-extras packages
+      shell: "amazon-linux-extras install docker -y"
+
+    - name: Enable Docker service at startup
+      service:
+        name: docker
+        state: started
+        enabled: yes 
+
+    - name: add ec2 user to docker group
+      shell: |
+        egrep -i "^docker" /etc/group; 
+        if [ $? -eq 0 ]; then echo "Group Exists"; else groupadd docker; fi;
+        usermod -a -G docker ec2-user
+
+    - name: Set credentials sudo aws configure
+      no_log: true
+      command: "aws configure set {{ item }}"
+      with_items:
+        - aws_access_key_id {{ access_key }}
+        - aws_secret_access_key {{ secret_key }}
+        - region {{ region }}
+        - output {{ output }}
+
+    - name: Docker Login sudo
+      shell: |
+        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 876724398547.dkr.ecr.us-east-2.amazonaws.com
+
+    - name: Docker Pull Image from ECR
+      shell: |
+        docker pull 876724398547.dkr.ecr.us-east-2.amazonaws.com/sam-docker-testapp:latest

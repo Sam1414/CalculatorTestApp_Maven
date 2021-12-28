@@ -1,0 +1,66 @@
+version: '3.2'
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - '${Prometheus_Port}'
+    container_name: monitoring_prometheus
+    links:
+        - pushgateway
+    depends_on:
+        - cadvisor
+    restart: unless-stopped
+    command:
+    - --config.file=/prometheus.yml
+    volumes:
+      - './prometheus.yml:/prometheus.yml'
+
+
+  pushgateway:
+    image: prom/pushgateway
+    container_name: monitoring_pushgateway
+    restart: unless-stopped
+    ports:
+      - '${Pushgateway_Port}'
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monitoring_node-exporter
+    restart: unless-stopped
+    ports:
+      - '${Node_Port}'
+      
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:latest
+    container_name: monitoring_cadvisor
+    ports:
+      - '${Cadvisor_Port}'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    restart: unless-stopped
+   
+    
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '${Grafana_Port}'
+    container_name: monitoring_grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - cadvisor
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana.ini:/grafana.ini
+      - ./datasource.yml:/provisioning/datasources/datasource.yml
+      - ./provisioning/dashboards:/provisioning/dashboards
